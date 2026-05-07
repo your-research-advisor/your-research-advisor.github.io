@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>YOUR NAME - Vulnerability Researcher | Exploit Developer</title>
+<meta name="description" content="Vulnerability Researcher and Exploit Developer specializing in kernel exploitation, browser security, and low-level security research.">
+
+<!-- ============================================================
+     CUSTOMIZATION BLOCK — Edit everything between these lines
+     ============================================================ -->
+<script>
+const CONFIG = {
+  // --- Identity ---
+  name:         "YOUR NAME",           // Your full name / handle
+  handle:       "@yourhandle",         // Twitter/X handle
+  tagline:      "Vulnerability Researcher · Exploit Developer · Low-level Hacker",
+  subtitle:     "Breaking things methodically since [YEAR]",
+
+  // --- Bio paragraphs (array — each item = one paragraph) ---
+  bio: [
+    "I research vulnerabilities and develop exploits across kernels, browsers, hypervisors, and embedded systems. My work lives at the intersection of reverse engineering, fuzzing, and turning \"undefined behaviour\" into root shells.",
+    "Past targets include [Browser], [OS Kernel], [Hypervisor] — accumulated CVEs in the wild. Presented research at [CONF1], [CONF2]. Published in [JOURNAL/ZINE].",
+    "Currently focused on [CURRENT_FOCUS]. Open to discussing responsible disclosure, bug bounty collaboration, or joint research projects.",
+  ],
+
+  // --- Social links (set url to '' to hide) ---
+  socials: [
+    { label: "GitHub",   url: "https://github.com/yourhandle",          icon: "gh"  },
+    { label: "Twitter",  url: "https://x.com/yourhandle",               icon: "tw"  },
+    { label: "LinkedIn", url: "https://linkedin.com/in/yourhandle",     icon: "li"  },
+    { label: "Keybase",  url: "https://keybase.io/yourhandle",          icon: "kb"  },
+  ],
+
+  // --- Articles (date, title, url) ---
+  articles: [
+    { date: "2025-01-01", title: "Article Title — Venue/Publication",   url: "#" },
+    { date: "2024-06-15", title: "Another Paper / Writeup Title",        url: "#" },
+    { date: "2023-11-03", title: "CVE-XXXX-XXXXX: Root Cause Analysis", url: "#" },
+    { date: "2023-04-20", title: "Phrack-style article title here",      url: "#" },
+    { date: "2022-08-09", title: "Conference Talk / Slide Deck",         url: "#" },
+  ],
+
+  // --- Projects ---
+  projects: [
+    {
+      year: "2025",
+      name: "Project Alpha",
+      url:  "https://github.com/yourhandle/project-alpha",
+      desc: "One-line description. What it does and why it matters."
+    },
+    {
+      year: "2024",
+      name: "FuzzKit",
+      url:  "https://github.com/yourhandle/fuzzkit",
+      desc: "Coverage-guided fuzzing harness for [TARGET]. Found N bugs."
+    },
+    {
+      year: "2023",
+      name: "Kernel Exploit PoC — CVE-XXXX-XXXXX",
+      url:  "https://github.com/yourhandle/cve-poc",
+      desc: "Full LPE chain for [OS] [VERSION]. Detailed write-up included."
+    },
+    {
+      year: "2022",
+      name: "Browser Exploit Framework",
+      url:  "#",
+      desc: "Modular framework for chaining renderer + sandbox escape primitives."
+    },
+    {
+      year: "2021",
+      name: "Static Analysis Tool",
+      url:  "https://github.com/yourhandle/satool",
+      desc: "Binary analysis utility for spotting vuln patterns in stripped binaries."
+    },
+  ],
+
+  // --- CVEs / Notable Findings (optional flex section) ---
+  cves: [
+    { id: "CVE-2025-XXXXX", target: "[Product]",   severity: "Critical", desc: "Brief description"   },
+    { id: "CVE-2024-XXXXX", target: "[Browser]",   severity: "High",     desc: "Brief description"   },
+    { id: "CVE-2023-XXXXX", target: "[OS Kernel]", severity: "Critical", desc: "Brief description"   },
+    { id: "CVE-2022-XXXXX", target: "[Hypervisor]",severity: "High",     desc: "Brief description"   },
+  ],
+
+  // --- Contact ---
+  contact: {
+    email:    "you@domain.com",
+    pgp:      "0xDEADBEEF CAFEBABE",   // set to '' to hide
+    note:     "Available for responsible disclosure, research collaboration, and consulting engagements. I don't bite — unless the binary does.",
+  },
+
+  // --- Aesthetic knobs ---
+  theme: {
+    accent:    "#00ff41",   // Matrix green — change freely
+    accentDim: "#008f20",
+    bg:        "#0a0a0a",
+    bgCard:    "#111111",
+    border:    "#1e1e1e",
+    text:      "#d4d4d4",
+    textDim:   "#666",
+    fontMono:  "'Courier New', Courier, monospace",
+    fontDisplay:"'Courier New', Courier, monospace",
+    scanlines:  true,       // CRT scanline overlay
+    glitch:     true,       // glitch effect on name
+    cursor:     true,       // blinking cursor in headline
+  }
+};
+</script>
+<!-- ============================================================
+     END CUSTOMIZATION BLOCK
+     ============================================================ -->
+
+<style>
+  :root {
+    --accent:     #00ff41;
+    --accent-dim: #008f20;
+    --bg:         #0a0a0a;
+    --bg-card:    #111111;
+    --border:     #1e1e1e;
+    --text:       #d4d4d4;
+    --text-dim:   #666;
+    --mono:       'Courier New', Courier, monospace;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 14px;
+    line-height: 1.7;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Scanlines overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(
+      to bottom,
+      transparent 0px,
+      transparent 3px,
+      rgba(0,0,0,0.12) 3px,
+      rgba(0,0,0,0.12) 4px
+    );
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0.4;
+  }
+
+  /* Noise texture */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 9998;
+    opacity: 0.6;
+  }
+
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  /* ── LAYOUT ── */
+  .site-wrap {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  /* ── HEADER / NAV ── */
+  header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(10,10,10,0.92);
+    backdrop-filter: blur(6px);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 0;
+  }
+
+  .nav-inner {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 0 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .site-id {
+    color: var(--accent);
+    font-size: 15px;
+    font-weight: bold;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    text-decoration: none;
+  }
+  .site-id:hover { text-decoration: none; }
+
+  nav { display: flex; gap: 24px; flex-wrap: wrap; }
+  nav a {
+    color: var(--text-dim);
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    transition: color 0.2s;
+  }
+  nav a:hover { color: var(--accent); text-decoration: none; }
+
+  /* ── HERO ── */
+  .hero {
+    padding: 80px 0 60px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .prompt-line {
+    color: var(--accent-dim);
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    margin-bottom: 20px;
+  }
+  .prompt-line::before { content: '$ '; color: var(--accent); }
+
+  h1 {
+    font-size: clamp(28px, 5vw, 48px);
+    font-weight: bold;
+    letter-spacing: 0.04em;
+    color: #fff;
+    line-height: 1.1;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+  }
+
+  .cursor {
+    display: inline-block;
+    width: 3px;
+    height: 1em;
+    background: var(--accent);
+    margin-left: 4px;
+    vertical-align: middle;
+    animation: blink 1s step-end infinite;
+  }
+
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+  /* Glitch effect */
+  @keyframes glitch1 {
+    0%   { clip-path: inset(0 0 95% 0); transform: translateX(-4px); }
+    20%  { clip-path: inset(30% 0 60% 0); transform: translateX(4px); }
+    40%  { clip-path: inset(60% 0 30% 0); transform: translateX(-2px); }
+    60%  { clip-path: inset(80% 0 5% 0); transform: translateX(3px); }
+    80%  { clip-path: inset(10% 0 80% 0); transform: translateX(-3px); }
+    100% { clip-path: inset(0 0 95% 0); transform: translateX(0); }
+  }
+  @keyframes glitch2 {
+    0%   { clip-path: inset(70% 0 20% 0); transform: translateX(3px); opacity: 0.7; }
+    25%  { clip-path: inset(5% 0 90% 0);  transform: translateX(-3px); }
+    50%  { clip-path: inset(50% 0 40% 0); transform: translateX(5px); }
+    75%  { clip-path: inset(85% 0 10% 0); transform: translateX(-2px); }
+    100% { clip-path: inset(70% 0 20% 0); transform: translateX(3px); }
+  }
+
+  .glitch-wrap { position: relative; display: inline-block; }
+  .glitch-wrap::before,
+  .glitch-wrap::after {
+    content: attr(data-text);
+    position: absolute;
+    inset: 0;
+    color: #fff;
+    font-size: inherit;
+    font-weight: inherit;
+    letter-spacing: inherit;
+    text-transform: inherit;
+    line-height: inherit;
+  }
+  .glitch-wrap::before {
+    color: #0ff;
+    animation: glitch1 6s infinite linear;
+    opacity: 0.6;
+  }
+  .glitch-wrap::after {
+    color: #f0f;
+    animation: glitch2 8s infinite linear;
+    opacity: 0.4;
+  }
+
+  .tagline {
+    color: var(--text-dim);
+    font-size: 13px;
+    margin-top: 14px;
+    letter-spacing: 0.05em;
+  }
+  .tagline .accent { color: var(--accent); }
+
+  .socials {
+    display: flex;
+    gap: 16px;
+    margin-top: 28px;
+    flex-wrap: wrap;
+  }
+  .socials a {
+    color: var(--text-dim);
+    font-size: 12px;
+    border: 1px solid var(--border);
+    padding: 5px 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    transition: all 0.2s;
+  }
+  .socials a:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+    text-decoration: none;
+    background: rgba(0,255,65,0.04);
+  }
+
+  /* ── SECTIONS ── */
+  section {
+    padding: 60px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  section:last-of-type { border-bottom: none; }
+
+  .section-header {
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+    margin-bottom: 36px;
+  }
+  .section-label {
+    color: var(--accent);
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+  }
+  h2 {
+    font-size: 11px;
+    color: var(--text-dim);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    font-weight: normal;
+  }
+
+  /* ── BIO ── */
+  .bio-text p {
+    margin-bottom: 16px;
+    color: var(--text);
+    max-width: 680px;
+  }
+  .bio-text p:last-child { margin-bottom: 0; }
+
+  /* ── ARTICLES ── */
+  .articles-list { list-style: none; }
+  .articles-list li {
+    display: grid;
+    grid-template-columns: 100px 1fr;
+    gap: 12px 20px;
+    padding: 10px 0;
+    border-top: 1px solid var(--border);
+    align-items: baseline;
+  }
+  .articles-list li:last-child { border-bottom: 1px solid var(--border); }
+  .art-date {
+    color: var(--text-dim);
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    white-space: nowrap;
+  }
+  .art-title {
+    color: var(--text);
+    font-size: 13px;
+    transition: color 0.2s;
+  }
+  .articles-list li:hover .art-title { color: var(--accent); }
+  .articles-list a:hover { text-decoration: none; }
+
+  /* ── PROJECTS ── */
+  .projects-list { list-style: none; }
+  .projects-list li {
+    padding: 14px 0;
+    border-top: 1px solid var(--border);
+    display: grid;
+    grid-template-columns: 60px 1fr;
+    gap: 8px 20px;
+  }
+  .projects-list li:last-child { border-bottom: 1px solid var(--border); }
+  .proj-year {
+    color: var(--text-dim);
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    padding-top: 2px;
+  }
+  .proj-body {}
+  .proj-name {
+    color: var(--accent);
+    font-size: 13px;
+    font-weight: bold;
+  }
+  .proj-name:hover { text-decoration: underline; }
+  .proj-desc {
+    color: var(--text-dim);
+    font-size: 12px;
+    margin-top: 3px;
+  }
+
+  /* ── CVE TABLE ── */
+  .cve-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+  }
+  .cve-table th {
+    text-align: left;
+    color: var(--text-dim);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 6px 12px 10px 0;
+    border-bottom: 1px solid var(--border);
+    font-weight: normal;
+  }
+  .cve-table td {
+    padding: 9px 12px 9px 0;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+  .cve-id { color: var(--accent); white-space: nowrap; }
+  .cve-sev {
+    display: inline-block;
+    padding: 1px 7px;
+    border-radius: 2px;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  .sev-Critical { background: rgba(255,40,40,0.15); color: #ff5555; border: 1px solid rgba(255,40,40,0.3); }
+  .sev-High     { background: rgba(255,165,0,0.12); color: #ffaa00; border: 1px solid rgba(255,165,0,0.3); }
+  .sev-Medium   { background: rgba(255,255,0,0.1);  color: #dddd00; border: 1px solid rgba(255,255,0,0.2); }
+  .sev-Low      { background: rgba(0,255,65,0.08);  color: #00cc33; border: 1px solid rgba(0,255,65,0.2); }
+  .cve-target   { color: var(--text); }
+  .cve-desc     { color: var(--text-dim); }
+
+  /* ── CONTACT ── */
+  .contact-block {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    padding: 28px 32px;
+    max-width: 560px;
+  }
+  .contact-note {
+    color: var(--text-dim);
+    margin-bottom: 22px;
+    font-size: 13px;
+    max-width: 480px;
+  }
+  .contact-list { list-style: none; }
+  .contact-list li {
+    display: flex;
+    gap: 14px;
+    padding: 5px 0;
+    font-size: 13px;
+  }
+  .contact-key { color: var(--text-dim); min-width: 80px; }
+  .contact-val { color: var(--text); }
+  .contact-val a { color: var(--accent); }
+  .pgp-badge {
+    display: inline-block;
+    font-size: 11px;
+    color: var(--text-dim);
+    border: 1px solid var(--border);
+    padding: 2px 8px;
+    margin-top: 4px;
+    letter-spacing: 0.06em;
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    padding: 30px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    border-top: 1px solid var(--border);
+    color: var(--text-dim);
+    font-size: 11px;
+    letter-spacing: 0.06em;
+  }
+  .footer-id { color: var(--accent); }
+
+  /* ── TERMINAL BOOT SCREEN ── */
+  #boot {
+    position: fixed;
+    inset: 0;
+    background: var(--bg);
+    z-index: 10000;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 40px 60px;
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--accent);
+  }
+  #boot-lines { max-width: 600px; }
+  #boot-lines p { margin-bottom: 4px; opacity: 0; animation: fadein 0.1s forwards; }
+  @keyframes fadein { to { opacity: 1; } }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 600px) {
+    .articles-list li { grid-template-columns: 1fr; gap: 2px; }
+    .projects-list li { grid-template-columns: 1fr; }
+    .cve-table .cve-desc { display: none; }
+    footer { flex-direction: column; align-items: flex-start; }
+    h1 { font-size: 24px; }
+    .contact-block { padding: 20px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Terminal boot screen -->
+<div id="boot">
+  <div id="boot-lines"></div>
+</div>
+
+<!-- ──────────────────── HEADER ──────────────────── -->
+<header>
+  <div class="nav-inner">
+    <a class="site-id" id="nav-brand" href="#">LOADING…</a>
+    <nav>
+      <a href="#about">About</a>
+      <a href="#articles">Articles</a>
+      <a href="#projects">Projects</a>
+      <a href="#cves">CVEs</a>
+      <a href="#contact">Contact</a>
+    </nav>
+  </div>
+</header>
+
+<!-- ──────────────────── HERO ──────────────────── -->
+<div class="site-wrap">
+  <div class="hero">
+    <div class="prompt-line" id="hero-prompt">whoami</div>
+    <h1>
+      <span class="glitch-wrap" id="hero-name" data-text="YOUR NAME">YOUR NAME</span><span class="cursor"></span>
+    </h1>
+    <p class="tagline" id="hero-tagline"></p>
+    <p class="tagline" id="hero-subtitle" style="margin-top:6px;font-size:12px;"></p>
+    <div class="socials" id="hero-socials"></div>
+  </div>
+
+  <!-- ──────────────────── ABOUT ──────────────────── -->
+  <section id="about">
+    <div class="section-header">
+      <span class="section-label">01</span>
+      <h2>About</h2>
+    </div>
+    <div class="bio-text" id="bio-text"></div>
+  </section>
+
+  <!-- ──────────────────── ARTICLES ──────────────────── -->
+  <section id="articles">
+    <div class="section-header">
+      <span class="section-label">02</span>
+      <h2>Articles &amp; Research</h2>
+    </div>
+    <ul class="articles-list" id="articles-list"></ul>
+  </section>
+
+  <!-- ──────────────────── PROJECTS ──────────────────── -->
+  <section id="projects">
+    <div class="section-header">
+      <span class="section-label">03</span>
+      <h2>Selected Projects</h2>
+    </div>
+    <ul class="projects-list" id="projects-list"></ul>
+  </section>
+
+  <!-- ──────────────────── CVEs ──────────────────── -->
+  <section id="cves">
+    <div class="section-header">
+      <span class="section-label">04</span>
+      <h2>Notable CVEs / Findings</h2>
+    </div>
+    <table class="cve-table" id="cve-table">
+      <thead>
+        <tr>
+          <th>CVE ID</th>
+          <th>Target</th>
+          <th>Severity</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody id="cve-body"></tbody>
+    </table>
+  </section>
+
+  <!-- ──────────────────── CONTACT ──────────────────── -->
+  <section id="contact">
+    <div class="section-header">
+      <span class="section-label">05</span>
+      <h2>Get in Touch</h2>
+    </div>
+    <div class="contact-block">
+      <p class="contact-note" id="contact-note"></p>
+      <ul class="contact-list" id="contact-list"></ul>
+    </div>
+  </section>
+
+  <!-- ──────────────────── FOOTER ──────────────────── -->
+  <footer>
+    <span class="footer-id" id="footer-id"></span>
+    <span id="footer-year"></span>
+  </footer>
+</div>
+
+<script>
+/* ── Apply theme CSS variables from CONFIG ── */
+(function applyTheme() {
+  const t = CONFIG.theme;
+  const r = document.documentElement.style;
+  r.setProperty('--accent',    t.accent);
+  r.setProperty('--accent-dim',t.accentDim);
+  r.setProperty('--bg',        t.bg);
+  r.setProperty('--bg-card',   t.bgCard);
+  r.setProperty('--border',    t.border);
+  r.setProperty('--text',      t.text);
+  r.setProperty('--text-dim',  t.textDim);
+  r.setProperty('--mono',      t.fontMono);
+  if (!t.scanlines) document.body.style.setProperty('--scanlines','none');
+})();
+
+/* ── Terminal boot sequence ── */
+(function bootSequence() {
+  const lines = [
+    `[    0.000] Booting security research terminal...`,
+    `[    0.021] Loading kernel modules: exploit_dev, vuln_research, reveng`,
+    `[    0.048] Initializing fuzzing subsystem... OK`,
+    `[    0.092] Mounting /proc/research... OK`,
+    `[    0.133] Checking CVE database integrity... OK`,
+    `[    0.201] Loading profile: ${CONFIG.name}`,
+    `[    0.240] Establishing encrypted channel... OK`,
+    `[    0.290] All systems operational.`,
+    ``,
+    `$ cat /etc/motd`,
+    ``,
+    `  ██╗  ██╗ █████╗  ██████╗██╗  ██╗███████╗██████╗`,
+    `  ██║  ██║██╔══██╗██╔════╝██║ ██╔╝██╔════╝██╔══██╗`,
+    `  ███████║███████║██║     █████╔╝ █████╗  ██████╔╝`,
+    `  ██╔══██║██╔══██║██║     ██╔═██╗ ██╔══╝  ██╔══██╗`,
+    `  ██║  ██║██║  ██║╚██████╗██║  ██╗███████╗██║  ██║`,
+    `  ╚═╝  ╚═╝╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝`,
+    ``,
+    `  "${CONFIG.tagline}"`,
+    ``,
+    `$ ./load_profile.sh`,
+  ];
+
+  const container = document.getElementById('boot-lines');
+  let i = 0;
+  function addLine() {
+    if (i >= lines.length) {
+      setTimeout(() => {
+        const boot = document.getElementById('boot');
+        boot.style.transition = 'opacity 0.5s';
+        boot.style.opacity = '0';
+        setTimeout(() => boot.remove(), 500);
+      }, 300);
+      return;
+    }
+    const p = document.createElement('p');
+    p.textContent = lines[i] || '\u00A0';
+    p.style.animationDelay = '0ms';
+    container.appendChild(p);
+    i++;
+    setTimeout(addLine, i < 9 ? 40 : 60);
+  }
+  addLine();
+})();
+
+/* ── Populate page from CONFIG ── */
+(function populate() {
+  const $ = id => document.getElementById(id);
+
+  // Nav brand
+  $('nav-brand').textContent = CONFIG.name.toUpperCase();
+
+  // Hero
+  $('hero-prompt').textContent = 'whoami // ' + CONFIG.handle;
+  const nameEl = $('hero-name');
+  nameEl.textContent = CONFIG.name.toUpperCase();
+  nameEl.dataset.text = CONFIG.name.toUpperCase();
+  $('hero-tagline').innerHTML = CONFIG.tagline.replace(/·/g, '<span class="accent"> · </span>');
+  $('hero-subtitle').textContent = CONFIG.subtitle;
+
+  // Socials
+  const socialsEl = $('hero-socials');
+  CONFIG.socials.filter(s => s.url).forEach(s => {
+    const a = document.createElement('a');
+    a.href = s.url;
+    a.target = '_blank';
+    a.rel = 'noopener';
+    a.textContent = `[ ${s.label} ]`;
+    socialsEl.appendChild(a);
+  });
+
+  // Bio
+  const bioEl = $('bio-text');
+  CONFIG.bio.forEach(para => {
+    const p = document.createElement('p');
+    p.textContent = para;
+    bioEl.appendChild(p);
+  });
+
+  // Articles
+  const artEl = $('articles-list');
+  CONFIG.articles.forEach(a => {
+    const li = document.createElement('li');
+    li.innerHTML = `
+      <span class="art-date">${a.date}</span>
+      <a class="art-title" href="${a.url}" target="_blank" rel="noopener">${a.title}</a>
+    `;
+    artEl.appendChild(li);
+  });
+
+  // Projects
+  const projEl = $('projects-list');
+  CONFIG.projects.forEach(p => {
+    const li = document.createElement('li');
+    li.innerHTML = `
+      <span class="proj-year">${p.year}</span>
+      <div class="proj-body">
+        <a class="proj-name" href="${p.url}" target="_blank" rel="noopener">${p.name}</a>
+        <p class="proj-desc">${p.desc}</p>
+      </div>
+    `;
+    projEl.appendChild(li);
+  });
+
+  // CVEs
+  const cveBody = $('cve-body');
+  CONFIG.cves.forEach(c => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="cve-id">${c.id}</td>
+      <td class="cve-target">${c.target}</td>
+      <td><span class="cve-sev sev-${c.severity}">${c.severity}</span></td>
+      <td class="cve-desc">${c.desc}</td>
+    `;
+    cveBody.appendChild(tr);
+  });
+
+  // Contact
+  $('contact-note').textContent = CONFIG.contact.note;
+  const cl = $('contact-list');
+  const contactItems = [
+    { key: 'e-mail', val: `<a href="mailto:${CONFIG.contact.email}">${CONFIG.contact.email}</a>` },
+    ...CONFIG.socials.filter(s => s.url).map(s => ({
+      key: s.label.toLowerCase(),
+      val: `<a href="${s.url}" target="_blank" rel="noopener">${s.url.replace('https://','')}</a>`
+    })),
+  ];
+  if (CONFIG.contact.pgp) {
+    contactItems.push({ key: 'PGP', val: `<span class="pgp-badge">${CONFIG.contact.pgp}</span>` });
+  }
+  contactItems.forEach(item => {
+    const li = document.createElement('li');
+    li.innerHTML = `<span class="contact-key">${item.key}:</span><span class="contact-val">${item.val}</span>`;
+    cl.appendChild(li);
+  });
+
+  // Footer
+  $('footer-id').textContent = CONFIG.name.toUpperCase() + '.GITHUB.IO';
+  $('footer-year').textContent = '© ' + new Date().getFullYear() + ' — All rights reserved.';
+
+  // Glitch toggle
+  if (!CONFIG.theme.glitch) {
+    document.querySelectorAll('.glitch-wrap::before, .glitch-wrap::after')
+      .forEach(el => el.style.display = 'none');
+  }
+  // Cursor toggle
+  if (!CONFIG.theme.cursor) {
+    document.querySelectorAll('.cursor').forEach(el => el.remove());
+  }
+})();
+</script>
+</body>
+</html>
