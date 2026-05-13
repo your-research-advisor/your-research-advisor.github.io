@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Undocumented Intel CPUs: Inside the Hidden Microcode Architecture — Positive Technologies Research</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Fraunces:ital,wght@0,300;0,600;0,900;1,300;1,600&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0f14;
+    --surface: #13161e;
+    --surface2: #1a1e29;
+    --border: #252a38;
+    --accent: #e8453c;
+    --accent2: #4f9cf9;
+    --accent3: #f0b429;
+    --text: #c9d1e0;
+    --text-dim: #7a8499;
+    --text-bright: #eef1f7;
+    --mono: 'IBM Plex Mono', monospace;
+    --serif: 'Fraunces', serif;
+    --sans: 'IBM Plex Sans', sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-weight: 300;
+    line-height: 1.8;
+    font-size: 17px;
+  }
+
+  /* HEADER */
+  header {
+    position: relative;
+    padding: 80px 0 60px;
+    border-bottom: 1px solid var(--border);
+    overflow: hidden;
+  }
+  header::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 60% -10%, rgba(232,69,60,0.12) 0%, transparent 70%),
+      radial-gradient(ellipse 50% 40% at 10% 110%, rgba(79,156,249,0.08) 0%, transparent 60%);
+  }
+  .header-inner {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 0 40px;
+    position: relative;
+  }
+  .tag-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 28px;
+  }
+  .tag {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border: 1px solid;
+    border-radius: 2px;
+  }
+  .tag-red { color: var(--accent); border-color: rgba(232,69,60,0.4); }
+  .tag-blue { color: var(--accent2); border-color: rgba(79,156,249,0.35); }
+  .tag-yellow { color: var(--accent3); border-color: rgba(240,180,41,0.35); }
+
+  h1 {
+    font-family: var(--serif);
+    font-weight: 900;
+    font-size: clamp(30px, 5vw, 52px);
+    line-height: 1.1;
+    color: var(--text-bright);
+    margin-bottom: 20px;
+    letter-spacing: -0.02em;
+  }
+  h1 em {
+    font-style: italic;
+    color: var(--accent);
+  }
+  .subtitle {
+    font-size: 18px;
+    color: var(--text-dim);
+    max-width: 620px;
+    font-weight: 300;
+    line-height: 1.6;
+    margin-bottom: 36px;
+  }
+  .meta {
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--text-dim);
+    letter-spacing: 0.06em;
+  }
+  .meta span { display: flex; align-items: center; gap: 6px; }
+  .meta-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); display: inline-block; }
+
+  /* LAYOUT */
+  .container { max-width: 860px; margin: 0 auto; padding: 0 40px; }
+
+  /* TL;DR BOX */
+  .tldr {
+    margin: 60px 0 0;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    padding: 28px 32px;
+    border-radius: 2px;
+  }
+  .tldr-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 12px;
+  }
+  .tldr p { color: var(--text); font-size: 15.5px; line-height: 1.75; }
+
+  /* SECTIONS */
+  section { margin: 72px 0; }
+  h2 {
+    font-family: var(--serif);
+    font-weight: 600;
+    font-size: 28px;
+    color: var(--text-bright);
+    margin-bottom: 20px;
+    letter-spacing: -0.01em;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  h2 .section-num {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--accent);
+    letter-spacing: 0.1em;
+    background: rgba(232,69,60,0.1);
+    padding: 3px 8px;
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+  h3 {
+    font-family: var(--serif);
+    font-weight: 600;
+    font-size: 19px;
+    color: var(--text-bright);
+    margin: 40px 0 14px;
+  }
+  p { margin-bottom: 18px; color: var(--text); }
+
+  /* CODE / MONO SPANS */
+  code {
+    font-family: var(--mono);
+    font-size: 13px;
+    background: var(--surface2);
+    color: var(--accent2);
+    padding: 2px 7px;
+    border-radius: 3px;
+    border: 1px solid var(--border);
+  }
+
+  /* INFO BOXES */
+  .info-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 22px 26px;
+    margin: 28px 0;
+  }
+  .info-box.blue { border-left: 3px solid var(--accent2); }
+  .info-box.yellow { border-left: 3px solid var(--accent3); }
+  .info-box.red { border-left: 3px solid var(--accent); }
+  .info-box-title {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  .info-box.blue .info-box-title { color: var(--accent2); }
+  .info-box.yellow .info-box-title { color: var(--accent3); }
+  .info-box.red .info-box-title { color: var(--accent); }
+  .info-box p { margin-bottom: 0; font-size: 15px; }
+
+  /* TABLE */
+  .table-wrap { overflow-x: auto; margin: 28px 0; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: var(--mono);
+    font-size: 13px;
+  }
+  th {
+    background: var(--surface2);
+    color: var(--accent3);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 11px;
+    padding: 12px 16px;
+    border: 1px solid var(--border);
+    text-align: left;
+  }
+  td {
+    padding: 11px 16px;
+    border: 1px solid var(--border);
+    color: var(--text);
+    vertical-align: top;
+  }
+  tr:nth-child(even) td { background: var(--surface); }
+
+  /* UOP FORMAT DIAGRAM */
+  .uop-diagram {
+    display: flex;
+    gap: 2px;
+    margin: 28px 0;
+    font-family: var(--mono);
+    font-size: 12px;
+    flex-wrap: wrap;
+  }
+  .uop-field {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    padding: 8px 14px;
+    border-radius: 3px;
+    text-align: center;
+  }
+  .uop-field .field-name { color: var(--accent2); font-size: 11px; letter-spacing: 0.08em; }
+  .uop-field .field-bits { color: var(--accent3); font-size: 10px; margin-top: 3px; }
+
+  /* ARRAY DIAGRAM */
+  .array-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 8px;
+    margin: 24px 0;
+  }
+  .array-cell {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    padding: 10px 8px;
+    text-align: center;
+    font-family: var(--mono);
+    font-size: 12px;
+    border-radius: 3px;
+  }
+  .array-cell.header-cell { background: var(--surface); color: var(--accent2); font-size: 11px; letter-spacing: 0.08em; }
+
+  /* BULLET LIST */
+  ul.styled {
+    list-style: none;
+    margin: 16px 0 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  ul.styled li {
+    padding-left: 22px;
+    position: relative;
+    font-size: 16px;
+  }
+  ul.styled li::before {
+    content: '▸';
+    position: absolute;
+    left: 0;
+    color: var(--accent);
+    font-size: 12px;
+    top: 3px;
+  }
+
+  /* DIVIDER */
+  .divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 64px 0;
+  }
+
+  /* PUBLISHER SECTION */
+  .publish-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 16px;
+    margin: 28px 0;
+  }
+  .publish-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 20px 22px;
+    transition: border-color 0.2s;
+  }
+  .publish-card:hover { border-color: var(--accent2); }
+  .publish-card-name {
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--accent2);
+    margin-bottom: 6px;
+  }
+  .publish-card-desc { font-size: 13.5px; color: var(--text-dim); line-height: 1.6; }
+
+  /* FOOTER */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 40px 0;
+    margin-top: 100px;
+  }
+  .footer-inner {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 0 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: gap;
+    gap: 16px;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--text-dim);
+  }
+
+  @media (max-width: 600px) {
+    .container { padding: 0 20px; }
+    .header-inner { padding: 0 20px; }
+    .uop-diagram { gap: 4px; }
+    .array-grid { grid-template-columns: repeat(3, 1fr); }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="tag-row">
+      <span class="tag tag-red">Security Research</span>
+      <span class="tag tag-blue">Intel Microcode</span>
+      <span class="tag tag-yellow">Hardware Security</span>
+      <span class="tag tag-blue">Positive Technologies</span>
+    </div>
+    <h1>Undocumented Intel CPUs:<br><em>Inside the Hidden Microcode Architecture</em></h1>
+    <p class="subtitle">A deep dive into Intel's secret microcode layer — how researchers from Positive Technologies uncovered undocumented instructions, JTAG internals, and the Atom microcode unlock that shook platform security.</p>
+    <div class="meta">
+      <span><span class="meta-dot"></span>Based on Positive Technologies Research</span>
+      <span>Intel Platform Security</span>
+      <span>Microcode Architecture</span>
+    </div>
+  </div>
+</header>
+
+<div class="container">
+
+  <div class="tldr">
+    <div class="tldr-label">TL;DR</div>
+    <p>Intel CPUs run on a hidden microcode layer that translates x86 instructions into internal micro-operations (µops). Researchers at Positive Technologies discovered that this layer can be read, and in some Atom processors, <strong>unlocked and patched</strong> — exposing a range of undocumented instructions, access to internal CPU state, and entirely new attack surfaces for platform security.</p>
+  </div>
+
+  <!-- SECTION 1 -->
+  <section>
+    <h2><span class="section-num">01</span> What is Microcode — and Why Should You Care?</h2>
+    <p>Every modern Intel processor contains a firmware layer invisible to software: <strong>microcode</strong>. It sits between the x86 instruction set you write and the actual transistor-level execution hardware. When your CPU fetches an <code>ADD</code> or <code>MOV</code> instruction, microcode translates it into a sequence of simpler, internal micro-operations (µops) that the execution engine actually runs.</p>
+    <p>This layer is entirely opaque. Intel ships CPUs with microcode burned into a ROM, with an optional RAM overlay that can be patched via OS or BIOS updates. The format, encoding, and semantics of these µops are never published publicly.</p>
+    <div class="info-box blue">
+      <div class="info-box-title">Why Microcode Matters for Security</div>
+      <p>Microcode runs <em>below</em> the OS, hypervisor, and even firmware. A vulnerability or backdoor at this level is essentially invisible to any standard security tool. The researcher's phrase: "access to CMS (internal microcode system) may not be achievable via documented MsrOps, but once accessed — becomes a full processor."</p>
+    </div>
+
+    <h3>The Instruction Documentation Problem</h3>
+    <p>Intel's architecture manuals describe the x86 ISA. But processors ship with undocumented instructions — opcodes that exist in silicon but appear in no manual. Positive Technologies researchers found these can be activated via specific WRMSR sequences, and that Atom-family processors are particularly susceptible to microcode unlocking.</p>
+  </section>
+
+  <!-- SECTION 2 -->
+  <section>
+    <h2><span class="section-num">02</span> The µop Format — A 72-Bit Secret</h2>
+    <p>A single Intel µop is encoded in a <strong>72-bit field</strong>. Based on researcher analysis, the structure breaks down as follows:</p>
+
+    <div class="uop-diagram">
+      <div class="uop-field">
+        <div class="field-name">FieldName</div>
+        <div class="field-bits">— bits —</div>
+      </div>
+      <div class="uop-field">
+        <div class="field-name">Priority / Sync</div>
+        <div class="field-bits">2 | 3</div>
+      </div>
+      <div class="uop-field">
+        <div class="field-name">OPA</div>
+        <div class="field-bits">2 bits</div>
+      </div>
+      <div class="uop-field">
+        <div class="field-name">UADDR</div>
+        <div class="field-bits">2 bits</div>
+      </div>
+      <div class="uop-field">
+        <div class="field-name">OPT</div>
+        <div class="field-bits">4 bits</div>
+      </div>
+      <div class="uop-field">
+        <div class="field-name">ERUCO / URO</div>
+        <div class="field-bits">2 bits</div>
+      </div>
+    </div>
+
+    <p>The <strong>UADDR field</strong> (micro-address) is key: it specifies the flow of execution through the microcode sequencer. The <strong>SYNC field</strong> — a 2-bit synchronisation marker — controls how the microcode synchronises to the CPU pipeline, reflecting RAM-based mirroring of the PRIMO execution model.</p>
+
+    <div class="info-box yellow">
+      <div class="info-box-title">Researcher Note on µop Fields</div>
+      <p>The 15-bit field in the µop encodes specific execution flow for microcode steps, and a separate 4-bit field embeds match/patch register indices. Two synchronisation fields together reflect the CPU's two-step synchronisation across microcode and hardware pipeline stages.</p>
+    </div>
+  </section>
+
+  <!-- SECTION 3 -->
+  <section>
+    <h2><span class="section-num">03</span> Sequence Words &amp; the Microcode Execution Model</h2>
+    <p>Each µop is part of a <strong>sequence word</strong>: a structured entry in the Microcode Sequencer ROM (MS-ROM) that guides the CPU through multi-µop instruction implementations. The structure used by researchers:</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Field</th><th>pa18</th><th>M1</th><th>M2</th><th>OPcode</th><th>immo</th><th>mo</th><th>mm1</th><th>D11</th><th>sec4</th><th>SRCO</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Size (bits)</td><td>2</td><td>1</td><td>1</td><td>8</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>0</td>
+          </tr>
+          <tr>
+            <td>Example values</td><td>2</td><td>1</td><td>1</td><td>12</td><td>1</td><td>5</td><td>6</td><td>6</td><td>6</td><td>6</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>The opcode field specifies the format of the encoded µop. Three separate "opcode" nodes in a sequence word implement what researchers call <strong>µop1, µop2, µop3</strong> — the three-step decode of each machine instruction reaching the complex decoder. This feeds into the 5-way decode pipeline, where simple decoders handle 1–4 µop instructions and the complex decoder covers those requiring 4 or more µops.</p>
+  </section>
+
+  <!-- SECTION 4 -->
+  <section>
+    <h2><span class="section-num">04</span> The LDAT: Reading the Microcode ROM</h2>
+    <p>The <strong>LDAT (Local Data Access Tool)</strong> is an internal CPU primitive that allows access to internal arrays using specific MSR sequences. Researchers used LDAT to:</p>
+    <ul class="styled">
+      <li>Read microcode ROM contents directly from the CPU</li>
+      <li>Access the MS-ROM (Microcode Sequencer ROM) entries</li>
+      <li>Enumerate internal CPU arrays (ARRAY0 through ARRAY4)</li>
+      <li>Probe internal state like JTAG ClockPassword registers</li>
+    </ul>
+
+    <p>The array structure accessed via LDAT:</p>
+    <div class="array-grid">
+      <div class="array-cell header-cell">ARRAY</div>
+      <div class="array-cell header-cell">PROPS_ROM</div>
+      <div class="array-cell header-cell">SEQ_WARP_ROM</div>
+      <div class="array-cell header-cell">MicroPatchArray</div>
+      <div class="array-cell header-cell">—</div>
+      <div class="array-cell">ARRAY0 (R0)</div>
+      <div class="array-cell">PROPS_ROM</div>
+      <div class="array-cell">SEQ WARP ROM</div>
+      <div class="array-cell">MicroPatchArray</div>
+      <div class="array-cell">—</div>
+      <div class="array-cell">ARRAY1 (RW)</div>
+      <div class="array-cell">—</div><div class="array-cell">—</div><div class="array-cell">—</div><div class="array-cell">—</div>
+      <div class="array-cell">ARRAY2 (RW)</div>
+      <div class="array-cell">—</div><div class="array-cell">—</div><div class="array-cell">—</div><div class="array-cell">—</div>
+      <div class="array-cell">ARRAY3 (RW)</div>
+      <div class="array-cell">—</div><div class="array-cell">—</div><div class="array-cell">—</div><div class="array-cell">—</div>
+      <div class="array-cell">ARRAY4 (RW)</div>
+      <div class="array-cell">—</div><div class="array-cell">—</div><div class="array-cell">—</div><div class="array-cell">—</div>
+    </div>
+
+    <p>Access to LDAT normally requires privileged Ring 0 access on MicroROM (read-only) and Ring -2 for write access. The LDAT opcode formatter encodes fields including: <code>hold_name</code>, <code>p-code format</code>, and <code>opcode size</code>. Several fields directly encode dynamic memory addresses for op-standby.</p>
+
+    <div class="info-box red">
+      <div class="info-box-title">Attack Relevance</div>
+      <p>If an attacker achieves Ring -2 (System Management Mode) or exploits an ME/CSME vulnerability, LDAT becomes a powerful tool for reading and potentially modifying live microcode execution — <em>below the visibility of any OS-level security</em>.</p>
+    </div>
+  </section>
+
+  <!-- SECTION 5 -->
+  <section>
+    <h2><span class="section-num">05</span> Instruction Documentation Sources &amp; Research Methods</h2>
+    <p>The researchers categorised Intel's instruction documentation into a tiered model:</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Level</th><th>Source</th><th>Access</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Public Documentation</td><td>IA-32/x64 SDM, MMX, SSE, AVX, BMI, TSX</td><td>Public</td></tr>
+          <tr><td>Restricted Documentation</td><td>Bootguard, Trusted Compute</td><td>Intel partners / NDA</td></tr>
+          <tr><td>Private Documentation</td><td>Intel Restricted Set</td><td>Internal Intel only</td></tr>
+          <tr><td>Undocumented</td><td>Microcode, ONCRT, SAI</td><td>Reverse engineered</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>The primary analysis technique employed was <strong>Intel ME (Management Engine) waypoint static analysis</strong> — using the ME firmware as a vector to understand the µ-code layer it initialises. The key insight: the ME's µ-code layer operates at <em>hardware-level instruction granularity</em>, implementing high-level machine code instructions that then implement further microcode.</p>
+
+    <h3>Tools Used by Researchers</h3>
+    <ul class="styled">
+      <li><strong>Intel VISA / Rabbit Holes</strong> — internal silicon bring-up and validation infrastructure</li>
+      <li><strong>Intel Management Engine (JTAG)</strong> — access to internal processor state via JTAG interface</li>
+      <li><strong>Intel DCI (Direct Connect Interface)</strong> — debugging interface bypassing OS, used for JTAG over USB</li>
+      <li><strong>XuCode</strong> — Intel's internal x86-to-microcode compiler / toolchain for complex instruction implementations</li>
+    </ul>
+  </section>
+
+  <!-- SECTION 6 -->
+  <section>
+    <h2><span class="section-num">06</span> The Microcode Decoder Architecture</h2>
+    <p>The researchers documented a detailed snapshot of the Intel CPU microcode decoder. The pipeline is:</p>
+
+    <div class="info-box blue">
+      <div class="info-box-title">Microcode Sequencer → 5-Way Decode Pipeline</div>
+      <p><strong>Microcode Sequencer ROM (MS-ROM)</strong> feeds into a <strong>5-way decode stage</strong>: one Complex Decoder handling 1–4+ µop instructions, and four Simple Decoders each handling 1-µop instructions. The decoded µops feed into the execution engine. Instruction shape (number of µops) determines scheduling — simple decoders maximise throughput while the complex decoder handles legacy or compound instructions.</p>
+    </div>
+
+    <p>The Microcode Decoder itself is implemented as a snapshot from the CPU core structure involving:</p>
+    <ul class="styled">
+      <li><strong>MicroaddrROM entry point</strong> — address lookup for each x86 opcode</li>
+      <li><strong>Comparator</strong> — matches incoming decoded opcodes to microcode entries</li>
+      <li><strong>Microcode Sequencer</strong> — sequences multi-µop translations</li>
+      <li><strong>NopAddr Register</strong> — handles NOP and no-operation optimisation paths</li>
+      <li><strong>MatchPatch Registers</strong> — hardware registers that hold patch match criteria for runtime microcode patching</li>
+    </ul>
+
+    <p>The patch mechanism implements two addresses: <strong>1st address → intercept execution of µprocedure</strong>, <strong>2nd address → add path (inside RAM)</strong>. This is essentially a CPU-level hook — analogous to function hooking but at the microcode execution layer.</p>
+  </section>
+
+  <!-- SECTION 7 -->
+  <section>
+    <h2><span class="section-num">07</span> Microcode Update: The RED-UNLOCK Vector</h2>
+    <p>Intel ships regular microcode updates that patch CPU errata and vulnerabilities (e.g. Spectre, Meltdown mitigations). These updates are:</p>
+    <ul class="styled">
+      <li>Loaded into Microcode RAM by OS/BIOS at boot</li>
+      <li>Encrypted and signed using an unknown algorithm</li>
+      <li>Distributed via Windows Update or <code>intel-microcode</code> Linux packages</li>
+    </ul>
+
+    <div class="info-box yellow">
+      <div class="info-box-title">Microcode Update — Encryption Detail</div>
+      <p>Routine updates are encrypted using CFFT65 (a proprietary transform). The encryption uses an unknown algorithm described as "well-formed" but distinct from documented RSA-2048. The update is signed using a proprietary RSA-2048 signature. The algorithm is documented internally as "Algorithm" but not matched to any public standard.</p>
+    </div>
+
+    <p>Critically, for the <strong>Intel Atom (Goldmont) family</strong>, researchers discovered a <strong>RED-UNLOCK</strong> capability: by writing a specific MSR sequence, the microcode update verification can be bypassed, allowing arbitrary unsigned microcode to be loaded into Microcode RAM.</p>
+
+    <p>The VOID ID for the Atom unlock: <code>0x20003 ... 0x8000000A1</code> — with patch payload <code>toBD7Array[2..4]</code> encoding the microcode patch content.</p>
+
+    <div class="info-box red">
+      <div class="info-box-title">CVE Reference</div>
+      <p>This research is related to <strong>CVE-2019-0043</strong> and the broader Atom Goldmont microcode unlock disclosed by Positive Technologies. It enables arbitrary microcode execution on affected CPUs without Intel signing validation.</p>
+    </div>
+  </section>
+
+  <!-- SECTION 8 -->
+  <section>
+    <h2><span class="section-num">08</span> JTAG &amp; the ClockPassword: Hardware Root Access</h2>
+    <p>JTAG (Joint Test Action Group) is a hardware debug interface present on Intel platforms. The researchers explored JTAG internals, finding:</p>
+    <ul class="styled">
+      <li>JTAG <strong>ClockPassword</strong> — a 79-bit value (no brute-force feasible) that gates hardware debug access</li>
+      <li>Unlocking JTAG on Atom-family CPUs means access to all CPU internal state, including the microcode execution flow</li>
+      <li>The unlock path: <em>chip red pill / brute-strip</em> (hardware fuzzing of JTAG password) — feasible only with physical access</li>
+      <li>Once unlocked: access to <strong>JTAG System State</strong>, currently only on the Device debug path</li>
+      <li>Intel DCI enables JTAG over USB debugging — originally for OEM bring-up, but exploitable if not disabled</li>
+    </ul>
+
+    <div class="info-box blue">
+      <div class="info-box-title">Platform Security Implication</div>
+      <p>On production systems, JTAG should be fused off. However, researchers found some retail and near-retail Atom devices with JTAG still accessible, enabling full hardware-level debug and microcode introspection — "how can internal debug (JTAG) debug OS firmware? DCI — debug OS firmware UEFI."</p>
+    </div>
+  </section>
+
+  <!-- SECTION 9 -->
+  <section>
+    <h2><span class="section-num">09</span> Access to CMS: The Undocumented Instructions</h2>
+    <p>The Positive Technologies research centred on accessing the <strong>CMS (CPU Microcode System)</strong> — the internal execution environment of the microcode layer itself. Key findings:</p>
+    <ul class="styled">
+      <li>CMS may not be accessible via documented <code>MsrOps</code> (Model Specific Register operations)</li>
+      <li>But once accessed, it provides full microcode-level control — including read/write to microcode RAM, patch registers, and internal CPU state</li>
+      <li>The <strong>Undocumented CAO (Chip Architecture Operation) instructions</strong> can read/write this state</li>
+      <li>Delivery mechanism: writing specific undocumented MSR sequences from Ring 0 on unlocked Atom processors</li>
+    </ul>
+
+    <div class="info-box yellow">
+      <div class="info-box-title">Still Open Questions</div>
+      <p>The researchers flagged that the sub-$0.09 bug bounty for critical microcode vulnerabilities reflects Intel's risk modelling — physical access is required for most of these. But with DCI enabled over USB, some of these attack paths become remote enough to warrant serious concern at the platform level.</p>
+    </div>
+  </section>
+
+  <!-- SECTION 10 -->
+  <section>
+    <h2><span class="section-num">10</span> Where to Publish This Research</h2>
+    <p>This type of technical hardware security research has several natural homes. Here are the best venues, ranked by fit:</p>
+
+    <div class="publish-grid">
+      <div class="publish-card">
+        <div class="publish-card-name">Medium / InfoSec Write-ups</div>
+        <div class="publish-card-desc">Best for reach. The InfoSec community on Medium has a large audience for CPU/microcode research. Use the <strong>InfoSec Write-ups</strong> publication for maximum distribution.</div>
+      </div>
+      <div class="publish-card">
+        <div class="publish-card-name">Substack</div>
+        <div class="publish-card-desc">Ideal for building a personal security research newsletter. Full control over formatting; allows deep technical posts. Growing fast in the security community.</div>
+      </div>
+      <div class="publish-card">
+        <div class="publish-card-name">Positive Technologies Blog / Habr</div>
+        <div class="publish-card-desc">Since this is based on Positive Tech research, their own blog or the Russian tech platform Habr (habr.com) are natural homes — huge security-savvy readership.</div>
+      </div>
+      <div class="publish-card">
+        <div class="publish-card-name">GitHub + GitHub Pages</div>
+        <div class="publish-card-desc">Publish the blog as a GitHub repo with GitHub Pages. Great for technical credibility; links well to any proof-of-concept code.</div>
+      </div>
+      <div class="publish-card">
+        <div class="publish-card-name">DEV.to</div>
+        <div class="publish-card-desc">Developer-focused community with strong SEO. Good for hardware-level security content aimed at engineers and security researchers.</div>
+      </div>
+      <div class="publish-card">
+        <div class="publish-card-name">The Hacker News / Reddit r/netsec</div>
+        <div class="publish-card-desc">Not a publishing platform but essential for distribution. Post a link to your blog here after publishing — r/netsec and HN both have active low-level security communities.</div>
+      </div>
+    </div>
+
+    <div class="info-box blue">
+      <div class="info-box-title">Recommendation</div>
+      <p><strong>Publish on Substack or Medium first</strong> (where you own the content and build an audience), then cross-post to DEV.to, and distribute via r/netsec and Hacker News. If you have a GitHub repo with supporting materials, link it prominently. This combination maximises both reach and credibility.</p>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <section>
+    <h2><span class="section-num">—</span> Conclusion</h2>
+    <p>The Positive Technologies research on Intel microcode is one of the most technically detailed public explorations of a CPU's hidden execution layer. The findings — from the 72-bit µop format to the RED-UNLOCK Atom vulnerability — reveal a world of undocumented complexity that exists in every Intel processor.</p>
+    <p>The key takeaways: microcode is not just a performance detail, it is a <strong>security boundary</strong>. When that boundary is crossed — whether via JTAG, DCI, or undocumented MSR sequences — the attacker has access to the most privileged execution context possible: below the OS, below the firmware, below every security control we rely on.</p>
+    <p>Understanding this layer is no longer optional for serious platform security engineers.</p>
+  </section>
+
+</div>
+
+<footer>
+  <div class="footer-inner">
+    <span>Based on Positive Technologies Intel Platform Security Research</span>
+    <span>Notes transcribed &amp; expanded for publication</span>
+  </div>
+</footer>
+
+</body>
+</html>
